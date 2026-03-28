@@ -82,10 +82,8 @@
                     tags: input_tags.value || null
                 }
 
-                console.log('Uploading post with params', params);
                 // Following code will upload the post to the database.
                 skapi.postRecord(event, params).then(async r => {
-                    console.log('Post uploaded successfully', r);
                     // If the section_posts was initially empty, we will set it to empty string.
                     if (section_posts.innerHTML === 'No posts found.') {
                         section_posts.innerHTML = '';
@@ -442,8 +440,6 @@
         Following function will create the html elements for the post.
     */
     async function createArticleContent(p) {
-        // p is the post object.
-        console.log({p})
         /*
             Following code will get the user id of the logged in user.
             The user variable is declared on the <script> tag above where we check if the user is logged in.
@@ -938,7 +934,7 @@
                 if (hash.startsWith('tag=')) {
                     let rawTag = hash.slice(4);
                     try {
-                        fetchQuery.tag = decodeURIComponent(rawTag);
+                        fetchQuery.tag = decodeURIComponent(rawTag); // decodeURIComponent is used to decode the tag value that is encoded in the url.
                     } catch (e) {
                         // Fallback for malformed encodings.
                         fetchQuery.tag = rawTag;
