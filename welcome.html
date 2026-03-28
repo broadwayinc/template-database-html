@@ -82,8 +82,10 @@
                     tags: input_tags.value || null
                 }
 
+                console.log('Uploading post with params', params);
                 // Following code will upload the post to the database.
                 skapi.postRecord(event, params).then(async r => {
+                    console.log('Post uploaded successfully', r);
                     // If the section_posts was initially empty, we will set it to empty string.
                     if (section_posts.innerHTML === 'No posts found.') {
                         section_posts.innerHTML = '';
@@ -149,8 +151,8 @@
             <input name="description" placeholder="Describe the picture." required></input>
 
             <small>Tags (optional)</small><br>
-            <input id='input_tags' pattern="[a-zA-Z0-9 ,]+"
-                title="Only alphanumeric characters, spaces, and commas are allowed"
+            <input id='input_tags' maxlength="64" pattern="[^\/\!\*\#]*"
+                title="Maximum 64 characters. Must not include /, !, *, or #"
                 placeholder="tag1, tag2, ..."></input>
 
             <br>
@@ -441,7 +443,7 @@
     */
     async function createArticleContent(p) {
         // p is the post object.
-
+        console.log({p})
         /*
             Following code will get the user id of the logged in user.
             The user variable is declared on the <script> tag above where we check if the user is logged in.
@@ -536,7 +538,7 @@
                 Following <small> will show the tags of the post.
                 When the user clicks the tag, it will redirect the user to the welcome.html page with the tag in the hash.
             -->
-            <small>${p.tags ? 'Tags: ' + p.tags.map(t => `<a href='welcome.html#tag=${t}'>${t}</a>`).join(', ') : ''}</small>
+            <small>${p.tags ? 'Tags: ' + p.tags.map(t => `<a href='welcome.html#tag=${encodeURIComponent(t)}'>${t}</a>`).join(', ') : ''}</small>
 
             <!--
                 Following <small> will show the comment count of the post.
@@ -934,7 +936,13 @@
                     And we will set the fetchQuery.tag to the tag value.
                 */
                 if (hash.startsWith('tag=')) {
-                    fetchQuery.tag = hash.slice(4);
+                    let rawTag = hash.slice(4);
+                    try {
+                        fetchQuery.tag = decodeURIComponent(rawTag);
+                    } catch (e) {
+                        // Fallback for malformed encodings.
+                        fetchQuery.tag = rawTag;
+                    }
                 }
 
                 getPosts(false);
